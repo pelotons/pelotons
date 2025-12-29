@@ -138,7 +138,7 @@ export function RouteBuilder() {
   // Track the drag state - which waypoint index is being dragged
   const [dragInsertIndex, setDragInsertIndex] = useState<number | null>(null);
   const lastRouteCalcTime = useRef(0);
-  const pendingCalcTimeout = useRef<NodeJS.Timeout | null>(null);
+  const pendingCalcTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDragWaypoints = useRef<Waypoint[] | null>(null);
 
   const handleRouteDrag = useCallback(
@@ -352,7 +352,7 @@ export function RouteBuilder() {
   };
 
   // Hover handlers for map <-> elevation profile sync
-  const handleElevationHover = useCallback((position: number | null, coords: [number, number] | null) => {
+  const handleElevationHover = useCallback((_position: number | null, coords: [number, number] | null) => {
     setHighlightCoordinate(coords);
   }, []);
 

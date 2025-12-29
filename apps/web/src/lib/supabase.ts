@@ -1,4 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Widget } from '@peloton/shared';
+
+// =============================================================================
+// ENVIRONMENT VALIDATION
+// =============================================================================
 
 const supabaseUrl = import.meta.env.SUPABASE_URL;
 const supabasePublishableKey = import.meta.env.SUPABASE_PUBLISHABLE_KEY;
@@ -11,18 +16,44 @@ if (!supabaseUrl || !supabasePublishableKey) {
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey);
 
-// Database types matching our schema
+// =============================================================================
+// SHARED TYPES
+// =============================================================================
+
+/** GPS coordinate as [longitude, latitude] tuple (GeoJSON order) */
+export type Coordinate = [number, number];
+
+/** Route waypoint with optional metadata */
+export interface Waypoint {
+  lat: number;
+  lng: number;
+  name?: string;
+  type?: 'start' | 'end' | 'via' | 'poi';
+  elevation?: number;
+}
+
+// =============================================================================
+// DATABASE TYPES - Match Supabase schema exactly (snake_case)
+// =============================================================================
+
+/**
+ * Layout table - Screen widget configurations
+ * Created in the web Layout Builder
+ */
 export interface DbLayout {
   id: string;
   user_id: string;
   name: string;
   screen_type: 'map' | 'data';
-  widgets: unknown;
+  widgets: Widget[];
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
+/**
+ * Routes table - GPX routes created in web app
+ */
 export interface DbRoute {
   id: string;
   user_id: string;
@@ -31,12 +62,15 @@ export interface DbRoute {
   distance_m: number;
   elevation_gain_m: number | null;
   gpx_data: string;
-  waypoints: unknown;
-  route_coordinates: unknown;
+  waypoints: Waypoint[];
+  route_coordinates: Coordinate[] | null;
   created_at: string;
   updated_at: string;
 }
 
+/**
+ * Rides table - Recorded cycling activities
+ */
 export interface DbRide {
   id: string;
   user_id: string;
@@ -58,6 +92,9 @@ export interface DbRide {
   created_at: string;
 }
 
+/**
+ * Sensors table - Paired Bluetooth sensors
+ */
 export interface DbSensor {
   id: string;
   user_id: string;
@@ -69,6 +106,9 @@ export interface DbSensor {
   created_at: string;
 }
 
+/**
+ * Route collections table - User-created route groupings
+ */
 export interface DbRouteCollection {
   id: string;
   user_id: string;
@@ -78,6 +118,9 @@ export interface DbRouteCollection {
   updated_at: string;
 }
 
+/**
+ * Collection routes junction table - Links routes to collections
+ */
 export interface DbCollectionRoute {
   id: string;
   collection_id: string;
@@ -86,6 +129,9 @@ export interface DbCollectionRoute {
   added_at: string;
 }
 
+/**
+ * Data profiles table - Screen configuration profiles
+ */
 export interface DbDataProfile {
   id: string;
   user_id: string;
@@ -96,6 +142,9 @@ export interface DbDataProfile {
   updated_at: string;
 }
 
+/**
+ * Profile screens table - Individual screens within a profile
+ */
 export interface DbProfileScreen {
   id: string;
   profile_id: string;
@@ -104,7 +153,107 @@ export interface DbProfileScreen {
   position: number;
   grid_columns: number;
   grid_rows: number;
-  widgets: unknown;
+  widgets: Widget[];
   created_at: string;
   updated_at: string;
+}
+
+// =============================================================================
+// TYPE GUARDS - Runtime validation helpers
+// =============================================================================
+
+/**
+ * Type guard to validate Widget array from database
+ */
+export function isWidgetArray(value: unknown): value is Widget[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      'id' in item &&
+      'type' in item &&
+      'x' in item &&
+      'y' in item &&
+      'width' in item &&
+      'height' in item
+  );
+}
+
+/**
+ * Type guard to validate Waypoint array from database
+ */
+export function isWaypointArray(value: unknown): value is Waypoint[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      'lat' in item &&
+      'lng' in item &&
+      typeof (item as Waypoint).lat === 'number' &&
+      typeof (item as Waypoint).lng === 'number'
+  );
+}
+
+/**
+ * Type guard to validate Coordinate array from database
+ */
+export function isCoordinateArray(value: unknown): value is Coordinate[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    (item) =>
+      Array.isArray(item) &&
+      item.length === 2 &&
+      typeof item[0] === 'number' &&
+      typeof item[1] === 'number'
+  );
+}
+
+/**
+ * Safely parse widgets from database JSON
+ */
+export function parseWidgets(value: unknown): Widget[] {
+  if (isWidgetArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (isWidgetArray(parsed)) return parsed;
+    } catch {
+      // Invalid JSON, return empty array
+    }
+  }
+  return [];
+}
+
+/**
+ * Safely parse waypoints from database JSON
+ */
+export function parseWaypoints(value: unknown): Waypoint[] {
+  if (isWaypointArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (isWaypointArray(parsed)) return parsed;
+    } catch {
+      // Invalid JSON, return empty array
+    }
+  }
+  return [];
+}
+
+/**
+ * Safely parse coordinates from database JSON
+ */
+export function parseCoordinates(value: unknown): Coordinate[] | null {
+  if (isCoordinateArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (isCoordinateArray(parsed)) return parsed;
+    } catch {
+      // Invalid JSON, return null
+    }
+  }
+  return null;
 }

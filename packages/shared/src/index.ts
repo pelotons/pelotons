@@ -4,7 +4,7 @@ export * from './types/route';
 export * from './types/ride';
 export * from './types/sensor';
 export * from './types/collection';
-// export * from './types/profile';  // Temporarily disabled
+export * from './types/profile';
 
 // Constants
 export * from './constants/bluetooth';

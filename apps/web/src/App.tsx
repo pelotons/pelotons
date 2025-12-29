@@ -3,12 +3,19 @@ import { useAuth } from './components/Auth/AuthProvider';
 import { AuthPage } from './components/Auth/AuthPage';
 import { Header } from './components/common/Header';
 import { RouteBuilder } from './components/RouteBuilder/RouteBuilder';
-import { LayoutBuilder } from './components/LayoutBuilder/LayoutBuilder';
 import { ProfileBuilder } from './components/LayoutBuilder/ProfileBuilder';
 import { RoutesPage } from './components/Routes/RoutesPage';
 import { RouteDetailPage } from './components/Routes/RouteDetailPage';
 import { CollectionsPage } from './components/Collections/CollectionsPage';
 import { CollectionDetailPage } from './components/Collections/CollectionDetailPage';
+import {
+  DocsLayout,
+  DocsOverview,
+  DocsGettingStarted,
+  DocsFeatures,
+  DocsFAQ,
+  WidgetReference,
+} from './components/Docs';
 
 function HomePage() {
   return (
@@ -196,6 +203,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      {/* Public Documentation Routes */}
+      <Route path="/docs" element={<DocsLayout />}>
+        <Route index element={<DocsOverview />} />
+        <Route path="getting-started" element={<DocsGettingStarted />} />
+        <Route path="features" element={<DocsFeatures />} />
+        <Route path="widgets" element={<WidgetReference />} />
+        <Route path="faq" element={<DocsFAQ />} />
+      </Route>
     </Routes>
   );
 }

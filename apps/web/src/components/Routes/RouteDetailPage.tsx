@@ -128,7 +128,7 @@ export function RouteDetailPage() {
     downloadGPX(route.gpxData, route.name);
   };
 
-  const handleElevationHover = (position: number | null, coords: [number, number] | null) => {
+  const handleElevationHover = (_position: number | null, coords: [number, number] | null) => {
     setHighlightCoordinate(coords);
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { geocodeSearch, GeocodingFeature } from '@/lib/mapbox';
 
 interface LocationSearchProps {
@@ -11,7 +11,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Debounce search

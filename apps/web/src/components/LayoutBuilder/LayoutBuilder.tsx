@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { WidgetLibrary } from './WidgetLibrary';
 import { WidgetCanvas } from './WidgetCanvas';
 import { useLayouts } from '@/hooks/useLayouts';

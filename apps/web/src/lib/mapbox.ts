@@ -57,13 +57,14 @@ export interface ElevationPoint {
 }
 
 export async function getElevation(
-  coordinates: [number, number][]
+  _coordinates: [number, number][]
 ): Promise<ElevationPoint[]> {
   // Mapbox Tilequery API for elevation
   // For MVP, we'll use a simpler approach or skip elevation
   // In production, you'd use Mapbox Terrain-RGB tiles
 
   // For now, return empty array - elevation can be added later
+  // TODO: Implement elevation lookup using Mapbox Terrain-RGB tiles
   return [];
 }
 

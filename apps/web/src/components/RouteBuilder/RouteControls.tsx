@@ -1,11 +1,11 @@
-import React from 'react';
+import { Fragment } from 'react';
 import { Waypoint } from '@peloton/shared';
 import { formatDistance } from '@/lib/gpx';
 
 interface RouteControlsProps {
   name: string;
   description: string;
-  distance: number;
+  distance: number; // Total distance (used by parent for display)
   waypoints: Waypoint[];
   segmentDistances?: number[];
   onNameChange: (name: string) => void;
@@ -17,7 +17,7 @@ interface RouteControlsProps {
 export function RouteControls({
   name,
   description,
-  distance,
+  distance: _distance, // Available for future use
   waypoints,
   segmentDistances = [],
   onNameChange,
@@ -82,7 +82,7 @@ export function RouteControls({
         ) : (
           <ul className="space-y-1 max-h-60 overflow-y-auto">
             {waypoints.map((waypoint, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 <li className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
                   <div className="flex items-center space-x-2">
                     <span
@@ -139,7 +139,7 @@ export function RouteControls({
                     </div>
                   </li>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </ul>
         )}

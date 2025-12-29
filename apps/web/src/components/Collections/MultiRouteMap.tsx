@@ -147,7 +147,7 @@ export function MultiRouteMap({ routes, highlightedRouteId, onRouteClick }: Mult
   useEffect(() => {
     if (!map.current || !map.current.isStyleLoaded()) return;
 
-    routes.forEach((route, index) => {
+    routes.forEach((route) => {
       const layerId = `route-layer-${route.id}`;
       if (!map.current!.getLayer(layerId)) return;
 
