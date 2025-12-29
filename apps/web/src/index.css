@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* LCD Color Palette */
+  --lcd-background: #e5e5e0;
+  --lcd-text: #222222;
+  --lcd-text-secondary: #666666;
+  --lcd-border: #999999;
+
+  /* Accent Colors */
+  --accent-blue: #0066cc;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mapbox overrides */
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-attrib-inner {
+  font-size: 10px;
+}
+
+/* LCD Widget Styling */
+.lcd-widget {
+  background: var(--lcd-background);
+  border: 1px solid var(--lcd-border);
+  border-radius: 4px;
+  font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+}
+
+.lcd-value {
+  color: var(--lcd-text);
+  font-weight: bold;
+}
+
+.lcd-label {
+  color: var(--lcd-text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.lcd-unit {
+  color: var(--lcd-text-secondary);
+  font-size: 0.875rem;
+}

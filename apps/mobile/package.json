@@ -1,0 +1,37 @@
+{
+  "name": "@peloton/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peloton/shared": "*",
+    "@react-navigation/bottom-tabs": "^6.5.11",
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.17",
+    "@rnmapbox/maps": "^10.1.11",
+    "@supabase/supabase-js": "^2.39.0",
+    "expo": "~50.0.0",
+    "expo-location": "~16.5.0",
+    "expo-status-bar": "~1.11.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "react-native-ble-plx": "^3.1.2",
+    "react-native-gesture-handler": "~2.14.0",
+    "react-native-pager-view": "6.2.2",
+    "react-native-reanimated": "~3.6.0",
+    "react-native-safe-area-context": "4.8.2",
+    "react-native-screens": "~3.29.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@types/react": "~18.2.45",
+    "typescript": "^5.3.0"
+  }
+}
