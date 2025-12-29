@@ -1,8 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+// Polyfill must be first - required for Supabase on React Native
+import 'react-native-url-polyfill/auto';
+
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl;
-const supabasePublishableKey = Constants.expoConfig?.extra?.supabasePublishableKey;
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || '';
+const supabasePublishableKey = Constants.expoConfig?.extra?.supabasePublishableKey || '';
 
 if (!supabaseUrl || !supabasePublishableKey) {
   console.warn(
@@ -10,7 +13,7 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl || '', supabasePublishableKey || '');
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabasePublishableKey);
 
 // Database types matching our schema
 export interface DbLayout {
