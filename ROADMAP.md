@@ -1478,6 +1478,500 @@ performance_metrics (daily aggregates)
 
 ---
 
+## Phase 6: Federated Network (Distributed Pelotons)
+
+Transform Pelotons into a decentralized network where clubs, shops, teams, and individuals can run their own instances while seamlessly sharing data across the network.
+
+### Vision
+
+Instead of a single centralized service, Pelotons becomes a protocol and network:
+
+- **pelotons.cc** - The central hub and reference instance
+- **Instance Operators** - Clubs, bike shops, teams, coaches, and power users run their own Pelotons servers
+- **Federation Protocol** - Instances communicate via standardized API to share routes, rides, and social interactions
+- **User Sovereignty** - Athletes own their data and choose what to share and with whom
+
+### Why Federate?
+
+| Benefit | Description |
+|---------|-------------|
+| Data Ownership | Users and organizations control their own data |
+| Privacy by Design | Share only what you want, with who you want |
+| Community Focus | Clubs run instances for their members with custom features |
+| Reliability | No single point of failure; local instances work offline |
+| Scalability | Load distributed across network operators |
+| Customization | Shops/clubs can brand and customize their instance |
+| Local Compliance | Data residency for GDPR, regional regulations |
+
+### Network Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           Pelotons Federation Network                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│                              ┌─────────────────────┐                            │
+│                              │    pelotons.cc      │                            │
+│                              │   (Central Hub)     │                            │
+│                              │  • Instance Registry │                            │
+│                              │  • Global Discovery  │                            │
+│                              │  • Reference Impl    │                            │
+│                              └──────────┬──────────┘                            │
+│                                         │                                        │
+│              ┌──────────────────────────┼──────────────────────────┐            │
+│              │                          │                          │            │
+│     ┌────────▼────────┐       ┌────────▼────────┐       ┌────────▼────────┐    │
+│     │  club.example   │◄─────►│ bikeshop.local  │◄─────►│  team.racing    │    │
+│     │  (Cycling Club) │       │ (Local Shop)    │       │  (Pro Team)     │    │
+│     │  250 members    │       │  50 customers   │       │  30 athletes    │    │
+│     └────────┬────────┘       └────────┬────────┘       └────────┬────────┘    │
+│              │                          │                          │            │
+│              │        Federation Protocol (REST + WebSocket)       │            │
+│              │         • Activity Sharing                          │            │
+│              │         • Route Discovery                           │            │
+│              │         • Social Follows                            │            │
+│              │         • Group Rides                               │            │
+│              └──────────────────────────┴──────────────────────────┘            │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Core Features
+
+| Feature | Description | Priority |
+|---------|-------------|----------|
+| Instance Deployment | One-click self-hosted Pelotons (Docker, Kubernetes) | High |
+| Instance Registry | Central directory of federated instances | High |
+| Federation Protocol | Standardized API for instance communication | High |
+| User Identity | Portable identity across instances (@user@instance) | High |
+| Privacy Controls | Granular sharing settings per data type | High |
+| Cross-Instance Following | Follow athletes on other instances | High |
+| Route Federation | Discover and sync routes across instances | High |
+| Activity Sharing | Share rides with followers on other instances | High |
+| Club Management | Instance admin tools for membership | Medium |
+| Instance Branding | Custom logos, colors, domain | Medium |
+| Data Portability | Export/import full account data | Medium |
+| Federation Allowlist | Control which instances can connect | Medium |
+| Offline Federation | Queue sync when connectivity restored | Medium |
+| Global Leaderboards | Opt-in cross-instance competitions | Low |
+| Instance Analytics | Usage stats for operators | Low |
+
+### User Identity Model
+
+Users have portable identities in the format `@username@instance.domain`:
+
+```typescript
+interface FederatedIdentity {
+  // Local identity
+  localId: string;              // UUID on home instance
+  username: string;             // Unique on home instance
+  displayName: string;
+  avatarUrl: string;
+
+  // Federation identity
+  homeInstance: string;         // e.g., "club.example.com"
+  federatedId: string;          // @username@instance format
+  publicKeyPem: string;         // For activity signing
+
+  // Discovery
+  webfingerUrl: string;         // /.well-known/webfinger
+  profileUrl: string;           // Public profile page
+  activityPubInbox?: string;    // Optional ActivityPub support
+}
+
+// Example: @mark@velocipede.club
+// Home instance: velocipede.club
+// Profile: https://velocipede.club/@mark
+// WebFinger: https://velocipede.club/.well-known/webfinger?resource=acct:mark@velocipede.club
+```
+
+### Privacy & Sharing Model
+
+Athletes control exactly what data is shared and with whom:
+
+```typescript
+interface PrivacySettings {
+  // Profile visibility
+  profileVisibility: 'public' | 'followers' | 'instance' | 'private';
+
+  // Activity sharing defaults
+  activityDefaults: {
+    visibility: 'public' | 'followers' | 'instance' | 'private';
+    shareLocation: boolean;          // GPS track
+    sharePerformance: boolean;       // Power, HR, speed
+    shareSensors: boolean;           // Device info
+    sharePhotos: boolean;
+  };
+
+  // Route sharing
+  routeSharing: {
+    createdRoutes: 'public' | 'followers' | 'instance' | 'private';
+    starredRoutes: 'public' | 'followers' | 'instance' | 'private';
+  };
+
+  // Federation controls
+  federation: {
+    allowDiscovery: boolean;         // Appear in global searches
+    allowFollowsFrom: 'any' | 'allowlisted' | 'none';
+    blockedInstances: string[];      // Instance-level blocks
+    blockedUsers: string[];          // @user@instance blocks
+  };
+
+  // Data retention
+  retention: {
+    activityHistory: 'forever' | '5years' | '2years' | '1year';
+    locationPrecision: 'exact' | 'approximate' | 'city' | 'hidden';
+    autoDeleteAfter?: number;        // Days
+  };
+}
+```
+
+### Federation Protocol
+
+Instances communicate via a REST API with signed requests:
+
+```typescript
+interface FederationAPI {
+  // Instance discovery
+  'GET /.well-known/pelotons-instance': InstanceInfo;
+  'GET /.well-known/webfinger': WebFingerResponse;
+
+  // User discovery
+  'GET /api/federation/users/:federatedId': FederatedUser;
+  'GET /api/federation/users/:federatedId/activities': Activity[];
+  'GET /api/federation/users/:federatedId/routes': Route[];
+
+  // Following
+  'POST /api/federation/follow': FollowRequest;
+  'POST /api/federation/unfollow': UnfollowRequest;
+  'GET /api/federation/followers': Follower[];
+  'GET /api/federation/following': Following[];
+
+  // Activity sync
+  'POST /api/federation/activities': Activity;          // Push activity to followers
+  'GET /api/federation/timeline': Activity[];           // Federated timeline
+
+  // Route sync
+  'POST /api/federation/routes/sync': RouteSync;        // Request route sync
+  'GET /api/federation/routes/:id': Route;              // Fetch route details
+
+  // Group rides
+  'POST /api/federation/events': GroupRideEvent;        // Announce event
+  'GET /api/federation/events': GroupRideEvent[];       // Discover events
+}
+
+interface InstanceInfo {
+  instanceId: string;
+  name: string;
+  description: string;
+  domain: string;
+  adminContact: string;
+  version: string;
+  federationVersion: string;
+  publicKey: string;
+
+  // Capabilities
+  features: string[];                // Supported features
+  maxUsers?: number;
+  openRegistration: boolean;
+
+  // Stats (optional)
+  stats?: {
+    users: number;
+    activities: number;
+    routes: number;
+  };
+
+  // Rules
+  termsUrl?: string;
+  privacyUrl?: string;
+}
+```
+
+### Request Signing
+
+All federation requests are signed to prevent spoofing:
+
+```typescript
+interface SignedRequest {
+  // HTTP Signature headers
+  'Signature': string;              // Signature of request
+  'Signature-Input': string;        // What was signed
+  'Date': string;                   // Timestamp
+  'Digest': string;                 // Body hash
+
+  // Pelotons-specific
+  'X-Pelotons-Instance': string;    // Sending instance domain
+  'X-Pelotons-Actor': string;       // @user@instance of requester
+}
+
+// Signature verification
+async function verifyFederationRequest(req: Request): Promise<boolean> {
+  const instanceDomain = req.headers['X-Pelotons-Instance'];
+  const instanceInfo = await fetchInstanceInfo(instanceDomain);
+
+  return verifyHttpSignature(req, instanceInfo.publicKey);
+}
+```
+
+### Instance Deployment
+
+Self-hosting options for different scales:
+
+```yaml
+# docker-compose.yml for small instance (< 100 users)
+version: '3.8'
+services:
+  pelotons:
+    image: pelotons/pelotons:latest
+    environment:
+      - INSTANCE_DOMAIN=club.example.com
+      - INSTANCE_NAME=Example Cycling Club
+      - ADMIN_EMAIL=admin@example.com
+      - DATABASE_URL=postgres://...
+      - FEDERATION_ENABLED=true
+      - HUB_REGISTRATION_KEY=xxx
+    ports:
+      - "443:443"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+
+  postgres:
+    image: postgres:15
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:
+```
+
+### Central Hub (pelotons.cc)
+
+The hub provides network-wide services:
+
+| Service | Description |
+|---------|-------------|
+| Instance Registry | Directory of all federated instances |
+| Global Search | Find users, routes, events across network |
+| Identity Verification | Optional verified badges for instances |
+| Federation Relay | Help small instances discover content |
+| Mobile App Backend | Unified API for mobile app users |
+| Instance Health | Monitor instance availability |
+| Protocol Updates | Coordinate federation protocol changes |
+
+```typescript
+interface HubServices {
+  // Registry
+  'POST /api/hub/instances/register': RegisterInstance;
+  'GET /api/hub/instances': Instance[];
+  'GET /api/hub/instances/:domain': InstanceDetails;
+  'DELETE /api/hub/instances/:domain': UnregisterInstance;
+
+  // Global discovery
+  'GET /api/hub/search/users': SearchUsers;
+  'GET /api/hub/search/routes': SearchRoutes;
+  'GET /api/hub/search/events': SearchEvents;
+
+  // Mobile app unified access
+  'GET /api/hub/user/:federatedId': UserProfile;
+  'GET /api/hub/timeline': FederatedTimeline;
+
+  // Health & stats
+  'GET /api/hub/health/:domain': InstanceHealth;
+  'GET /api/hub/stats': NetworkStats;
+}
+```
+
+### Mobile App Federation Support
+
+The mobile app seamlessly works across instances:
+
+```typescript
+interface MobileAppConfig {
+  // User's home instance
+  homeInstance: string;
+  accessToken: string;
+
+  // Cached instance connections
+  knownInstances: Map<string, InstanceConnection>;
+
+  // Federation preferences
+  preferences: {
+    showFederatedContent: boolean;
+    autoFollowBackHomeInstance: boolean;
+    cacheRemoteProfiles: boolean;
+  };
+}
+
+// Login flow
+async function loginFederated(identifier: string): Promise<Session> {
+  // Parse @user@instance or user@instance.com
+  const { username, instance } = parseIdentifier(identifier);
+
+  // Discover instance
+  const instanceInfo = await discoverInstance(instance);
+
+  // Authenticate with home instance
+  return authenticate(instanceInfo.authEndpoint, username);
+}
+
+// Unified timeline
+async function getFederatedTimeline(config: MobileAppConfig): Promise<Activity[]> {
+  // Get activities from home instance (includes federated content)
+  const activities = await config.homeInstance.getTimeline();
+
+  // Activities include remote users' content via federation
+  return activities;
+}
+```
+
+### Database Schema for Federation
+
+```sql
+-- Instance registry (on hub)
+federated_instances
+├── id                   UUID PRIMARY KEY
+├── domain               TEXT UNIQUE
+├── name                 TEXT
+├── description          TEXT
+├── public_key           TEXT
+├── admin_contact        TEXT
+├── version              TEXT
+├── federation_version   TEXT
+├── features             TEXT[]
+├── open_registration    BOOLEAN
+├── verified             BOOLEAN DEFAULT false
+├── last_seen_at         TIMESTAMP
+├── registered_at        TIMESTAMP
+└── metadata             JSONB
+
+-- Remote users cache (on each instance)
+remote_users
+├── id                   UUID PRIMARY KEY
+├── federated_id         TEXT UNIQUE  -- @user@instance
+├── home_instance        TEXT
+├── username             TEXT
+├── display_name         TEXT
+├── avatar_url           TEXT
+├── profile_url          TEXT
+├── public_key           TEXT
+├── last_fetched_at      TIMESTAMP
+└── cached_data          JSONB
+
+-- Federation follows
+federation_follows
+├── id                   UUID PRIMARY KEY
+├── follower_id          UUID REFERENCES users
+├── following_id         TEXT          -- @user@instance (may be remote)
+├── status               TEXT ('pending' | 'accepted' | 'rejected')
+├── created_at           TIMESTAMP
+└── accepted_at          TIMESTAMP
+
+-- Federated activities cache
+federated_activities
+├── id                   UUID PRIMARY KEY
+├── remote_id            TEXT          -- Original ID on home instance
+├── author_id            TEXT          -- @user@instance
+├── activity_type        TEXT
+├── content              JSONB
+├── visibility           TEXT
+├── published_at         TIMESTAMP
+├── fetched_at           TIMESTAMP
+└── expires_at           TIMESTAMP     -- Cache expiration
+
+-- Instance relationships (allowlist/blocklist)
+instance_relationships
+├── id                   UUID PRIMARY KEY
+├── instance_domain      TEXT          -- This instance
+├── remote_domain        TEXT          -- Other instance
+├── relationship         TEXT ('allow' | 'block' | 'silence')
+├── reason               TEXT
+├── created_by           UUID REFERENCES users
+└── created_at           TIMESTAMP
+
+-- Outbound federation queue
+federation_outbox
+├── id                   UUID PRIMARY KEY
+├── target_instance      TEXT
+├── payload_type         TEXT
+├── payload              JSONB
+├── status               TEXT ('pending' | 'sent' | 'failed')
+├── attempts             INTEGER DEFAULT 0
+├── last_attempt_at      TIMESTAMP
+├── created_at           TIMESTAMP
+└── error_message        TEXT
+```
+
+### Use Cases
+
+**Cycling Club Instance:**
+```
+Domain: velocipede.club
+Members: 250 club cyclists
+Features:
+  - Club-only group rides and events
+  - Member leaderboards
+  - Route library for local rides
+  - Integration with club website
+  - Members can follow athletes on other instances
+```
+
+**Bike Shop Instance:**
+```
+Domain: pelotons.mikescycles.com
+Users: 50 regular customers
+Features:
+  - Customer accounts linked to shop POS
+  - Service reminders federation
+  - Shop-hosted group rides
+  - Local route recommendations
+  - Product recommendations based on riding
+```
+
+**Pro Team Instance:**
+```
+Domain: training.teamacme.racing
+Users: 30 pro athletes + 10 staff
+Features:
+  - Private by default (team only)
+  - Coach-athlete data sharing
+  - Training plan management
+  - Performance analytics
+  - Selective public sharing for fans
+```
+
+**Individual Self-Hoster:**
+```
+Domain: pelotons.johndoe.me
+Users: 1 (personal)
+Features:
+  - Full data sovereignty
+  - Connect with friends on other instances
+  - Backup to personal storage
+  - Custom integrations
+```
+
+### Implementation Phases
+
+| Phase | Scope | Timeline |
+|-------|-------|----------|
+| 6.1 | Instance deployment package (Docker) | 2-3 weeks |
+| 6.2 | Federation protocol v1 (follows, activities) | 4-6 weeks |
+| 6.3 | Central hub services | 3-4 weeks |
+| 6.4 | Mobile app federation support | 3-4 weeks |
+| 6.5 | Route federation | 2-3 weeks |
+| 6.6 | Group rides & events federation | 2-3 weeks |
+| 6.7 | Instance admin tools | 2-3 weeks |
+
+---
+
 ## Implementation Priority Matrix
 
 | Phase | Feature | Impact | Effort | Priority |
