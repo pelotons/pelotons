@@ -1,4 +1,5 @@
 -- Migration: Add athlete profiles table
+--
 -- This table stores user physiological data and preferences needed for
 -- calculating metrics like W/kg, power zones, heart rate zones, TSS, etc.
 

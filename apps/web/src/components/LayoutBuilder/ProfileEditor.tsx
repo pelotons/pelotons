@@ -5,6 +5,7 @@ import {
   DEVICE_PRESETS,
   DEVICE_PRESET_LIST,
 } from '@peloton/shared';
+import { PhoneSimulator } from './PhoneSimulator';
 
 interface ProfileEditorProps {
   profile: DataProfileWithScreens;
@@ -38,86 +39,89 @@ export function ProfileEditor({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      {/* Profile Settings */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
-          Profile Settings
-        </h2>
+    <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="flex gap-8">
+        {/* Left side - Settings and Screens */}
+        <div className="flex-1">
+          {/* Profile Settings */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+              Profile Settings
+            </h2>
 
-        <div className="grid gap-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            {isEditingName ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSaveName();
-                    if (e.key === 'Escape') {
-                      setEditName(profile.name);
-                      setIsEditingName(false);
-                    }
-                  }}
-                />
-                <button
-                  onClick={handleSaveName}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => {
-                    setEditName(profile.name);
-                    setIsEditingName(false);
-                  }}
-                  className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                >
-                  Cancel
-                </button>
+            <div className="grid gap-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                {isEditingName ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveName();
+                        if (e.key === 'Escape') {
+                          setEditName(profile.name);
+                          setIsEditingName(false);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditName(profile.name);
+                        setIsEditingName(false);
+                      }}
+                      className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
+                    onClick={() => setIsEditingName(true)}
+                  >
+                    <span>{profile.name}</span>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div
-                className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
-                onClick={() => setIsEditingName(true)}
-              >
-                <span>{profile.name}</span>
-                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
+
+              {/* Device */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Device</label>
+                <select
+                  value={profile.deviceType}
+                  onChange={(e) => handleDeviceChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {DEVICE_PRESET_LIST.map((device) => (
+                    <option key={device.id} value={device.id}>
+                      {device.name} ({device.suggestedGrid.columns}×{device.suggestedGrid.rows} grid)
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-sm text-gray-500">
+                  Screen size: {DEVICE_PRESETS[profile.deviceType]?.screenWidth}×
+                  {DEVICE_PRESETS[profile.deviceType]?.screenHeight} points
+                </p>
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Device */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Device</label>
-            <select
-              value={profile.deviceType}
-              onChange={(e) => handleDeviceChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {DEVICE_PRESET_LIST.map((device) => (
-                <option key={device.id} value={device.id}>
-                  {device.name} ({device.suggestedGrid.columns}×{device.suggestedGrid.rows} grid)
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              Screen size: {DEVICE_PRESETS[profile.deviceType]?.screenWidth}×
-              {DEVICE_PRESETS[profile.deviceType]?.screenHeight} points
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Screens List */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+          {/* Screens List */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
             Screens ({profile.screens.length})
@@ -241,9 +245,32 @@ export function ProfileEditor({
           </div>
         )}
 
-        <p className="mt-4 text-sm text-gray-500">
-          Users will scroll through screens in this order while riding. Drag to reorder.
-        </p>
+          <p className="mt-4 text-sm text-gray-500">
+            Users will scroll through screens in this order while riding. Drag to reorder.
+          </p>
+        </div>
+        </div>
+
+        {/* Right side - Phone Simulator Preview */}
+        <div className="w-80 flex-shrink-0">
+          <div className="sticky top-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4 text-center">
+                Preview
+              </h2>
+              <div className="flex justify-center">
+                <PhoneSimulator
+                  deviceType={profile.deviceType}
+                  screens={profile.screens}
+                  scale={0.45}
+                />
+              </div>
+              <p className="text-xs text-gray-400 text-center mt-4">
+                Swipe to preview screens
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

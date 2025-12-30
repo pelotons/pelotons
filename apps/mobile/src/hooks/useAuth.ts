@@ -1,34 +1,53 @@
-import { useState, useCallback } from 'react';
-
-// Temporarily disabled Supabase auth to allow app to load
-// TODO: Re-enable once URL polyfill issue is resolved
-
-type User = any;
-type Session = any;
-type AuthError = any;
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
+import type { User, Session, AuthError } from '@supabase/supabase-js';
 
 export function useAuth() {
-  // Mock user for testing - skip login screen
-  const [user] = useState<User | null>({ id: 'mock-user', email: 'test@example.com' });
-  const [session] = useState<Session | null>({ user });
-  const [loading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('Failed to get session:', error);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signUp = useCallback(
-    async (_email: string, _password: string): Promise<{ error: AuthError | null }> => {
-      return { error: null };
+    async (email: string, password: string): Promise<{ error: AuthError | null }> => {
+      const { error } = await supabase.auth.signUp({ email, password });
+      return { error };
     },
     []
   );
 
   const signIn = useCallback(
-    async (_email: string, _password: string): Promise<{ error: AuthError | null }> => {
-      return { error: null };
+    async (email: string, password: string): Promise<{ error: AuthError | null }> => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
     },
     []
   );
 
   const signOut = useCallback(async (): Promise<void> => {
-    console.log('Sign out (mocked)');
+    await supabase.auth.signOut();
   }, []);
 
   return {

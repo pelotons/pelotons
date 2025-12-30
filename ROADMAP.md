@@ -383,7 +383,7 @@ type ComponentType =
 ### Service Reminders
 
 ```typescript
-interface ServiceReminder {
+interface ServiceReminder {claude
   id: string;
   bikeId: string;
   componentType: ComponentType;

@@ -148,3 +148,51 @@ export function calculateAge(dateOfBirth: string): number {
 export function estimateMaxHr(age: number): number {
   return Math.round(220 - age);
 }
+
+/**
+ * Get the current power zone for a given wattage and FTP
+ * Returns zone number (1-7) and zone info
+ */
+export function getPowerZone(watts: number, ftp: number): PowerZone | null {
+  if (ftp <= 0 || watts < 0) return null;
+  const zones = calculatePowerZones(ftp);
+
+  for (let i = zones.zones.length - 1; i >= 0; i--) {
+    if (watts >= zones.zones[i].minWatts) {
+      return zones.zones[i];
+    }
+  }
+  return zones.zones[0];
+}
+
+/**
+ * Get the current heart rate zone for a given BPM and max HR
+ * Returns zone number (1-5) and zone info
+ */
+export function getHeartRateZone(bpm: number, maxHr: number, lthr?: number | null): HeartRateZone | null {
+  if (maxHr <= 0 || bpm < 0) return null;
+  const zones = calculateHeartRateZones(maxHr, lthr);
+
+  for (let i = zones.zones.length - 1; i >= 0; i--) {
+    if (bpm >= zones.zones[i].minBpm) {
+      return zones.zones[i];
+    }
+  }
+  return zones.zones[0];
+}
+
+/**
+ * Get zone color for a power value
+ */
+export function getPowerZoneColor(watts: number, ftp: number): string {
+  const zone = getPowerZone(watts, ftp);
+  return zone?.color ?? '#9ca3af';
+}
+
+/**
+ * Get zone color for a heart rate value
+ */
+export function getHeartRateZoneColor(bpm: number, maxHr: number, lthr?: number | null): string {
+  const zone = getHeartRateZone(bpm, maxHr, lthr);
+  return zone?.color ?? '#9ca3af';
+}

@@ -12,7 +12,7 @@
     "build:web": "npm run build -w apps/web",
     "build:shared": "npm run build -w packages/shared",
     "lint": "eslint apps packages --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "npm run typecheck -w packages/shared && npm run typecheck -w apps/web && npm run typecheck -w apps/mobile"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -22,6 +22,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@react-native-community/cli-server-api": "^20.0.2",
     "react-native": "0.73.6"
   }
 }

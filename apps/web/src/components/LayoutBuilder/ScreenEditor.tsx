@@ -9,6 +9,8 @@ import {
   MAX_GRID_COLUMNS,
   MIN_GRID_ROWS,
   MAX_GRID_ROWS,
+  GRID_PRESETS,
+  FontSizePreference,
 } from '@peloton/shared';
 import { WidgetCanvas } from './WidgetCanvas';
 import { WidgetLibrary } from './WidgetLibrary';
@@ -162,6 +164,14 @@ export function ScreenEditor({
     }
   };
 
+  const handleWidgetConfigUpdate = (widgetId: string, config: Partial<Widget['config']>) => {
+    onUpdateScreen(screen.id, {
+      widgets: screen.widgets.map((w) =>
+        w.id === widgetId ? { ...w, config: { ...w.config, ...config } } : w
+      ),
+    });
+  };
+
   // Map screen just shows a placeholder
   if (screen.screenType === 'map') {
     return (
@@ -264,8 +274,28 @@ export function ScreenEditor({
 
             {/* Grid settings */}
             <div className="flex items-center gap-4">
+              {/* Grid presets */}
+              <div className="flex items-center gap-1">
+                {GRID_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    onClick={() => handleGridChange(preset.columns, preset.rows)}
+                    className={`px-2 py-1 text-xs rounded border transition-colors ${
+                      screen.gridColumns === preset.columns && screen.gridRows === preset.rows
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="w-px h-6 bg-gray-300" />
+
+              {/* Custom grid */}
               <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-500">Grid:</label>
+                <label className="text-sm text-gray-500">Custom:</label>
                 <select
                   value={screen.gridColumns}
                   onChange={(e) => handleGridChange(parseInt(e.target.value), screen.gridRows)}
@@ -292,7 +322,7 @@ export function ScreenEditor({
                   onClick={() => handleGridChange(device.suggestedGrid.columns, device.suggestedGrid.rows)}
                   className="text-sm text-blue-600 hover:text-blue-700"
                 >
-                  Reset to device default
+                  Device default
                 </button>
               )}
             </div>
@@ -362,6 +392,22 @@ export function ScreenEditor({
                 <p className="text-sm text-gray-500">
                   Column {selectedWidget.x + 1}, Row {selectedWidget.y + 1}
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Font Size</label>
+                <select
+                  value={selectedWidget.config?.fontSizePreference || 'auto'}
+                  onChange={(e) => handleWidgetConfigUpdate(selectedWidget.id, {
+                    fontSizePreference: e.target.value as FontSizePreference
+                  })}
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                >
+                  <option value="auto">Auto (fit to widget)</option>
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
               </div>
 
               <hr />

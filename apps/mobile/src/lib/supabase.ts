@@ -1,35 +1,31 @@
-// Supabase client with lazy initialization
-// The polyfill must be loaded before this - see src/setup.ts
+// Supabase client for React Native
+// URL polyfill is loaded in index.js before this module
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-let _supabase: any = null;
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || '';
+const supabaseAnonKey = Constants.expoConfig?.extra?.supabasePublishableKey || '';
 
-export function getSupabase(): any {
-  if (!_supabase) {
-    // Lazy require to ensure polyfill loads first
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || '';
-    const supabasePublishableKey = Constants.expoConfig?.extra?.supabasePublishableKey || '';
-
-    if (!supabaseUrl || !supabasePublishableKey) {
-      console.warn(
-        'Missing Supabase config. Check SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in .env'
-      );
-    }
-
-    _supabase = createClient(supabaseUrl, supabasePublishableKey);
-  }
-  return _supabase;
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    'Missing Supabase config. Check SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in .env'
+  );
 }
 
-// Backward compatible export - calls getSupabase() on first access
-export const supabase: any = new Proxy({}, {
-  get(_, prop) {
-    const client = getSupabase();
-    const value = client[prop];
-    return typeof value === 'function' ? value.bind(client) : value;
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
   },
 });
+
+// Legacy export for compatibility
+export function getSupabase(): SupabaseClient {
+  return supabase;
+}
 
 // Database types matching our schema
 export interface DbLayout {

@@ -193,6 +193,8 @@ export type WidgetType =
 // WIDGET CONFIGURATION
 // =============================================================================
 
+export type FontSizePreference = 'auto' | 'small' | 'medium' | 'large';
+
 export interface WidgetConfig {
   unit?: 'metric' | 'imperial';
   showLabel?: boolean;
@@ -200,7 +202,8 @@ export interface WidgetConfig {
   showMax?: boolean;
   showZone?: boolean;
   zoneColors?: boolean;
-  fontSize?: 'small' | 'medium' | 'large';
+  fontSize?: 'small' | 'medium' | 'large'; // Legacy - use fontSizePreference
+  fontSizePreference?: FontSizePreference; // 'auto' scales to fit widget
   precision?: number;
   smoothingSeconds?: number;
   targetValue?: number;

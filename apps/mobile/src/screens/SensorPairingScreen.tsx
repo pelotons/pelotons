@@ -47,7 +47,7 @@ export function SensorPairingScreen() {
 
     // Start scanning
     bleManager.startDeviceScan(
-      SCAN_SERVICE_UUIDS as string[],
+      [...SCAN_SERVICE_UUIDS] as string[],
       { allowDuplicates: false },
       (error, device) => {
         if (error) {
