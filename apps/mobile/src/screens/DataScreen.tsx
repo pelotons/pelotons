@@ -98,7 +98,7 @@ const DEFAULT_SCREEN: ProfileScreen = {
 };
 
 export function DataScreen() {
-  const { profile, loading: profileLoading } = useActiveProfile();
+  const { profile, loading: profileLoading, isConnected } = useActiveProfile();
   const { profile: athleteProfile } = useAthleteProfile();
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const translateX = useRef(new Animated.Value(0)).current;
@@ -160,7 +160,11 @@ export function DataScreen() {
     <View style={styles.container}>
       {/* Screen name */}
       <View style={styles.header}>
-        <Text style={styles.screenName}>{currentScreen.name}</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.screenName}>{currentScreen.name}</Text>
+          {/* Sync indicator */}
+          <View style={[styles.syncIndicator, isConnected && styles.syncIndicatorConnected]} />
+        </View>
         {screens.length > 1 && (
           <Text style={styles.screenIndicator}>
             {currentScreenIndex + 1} / {screens.length}
@@ -352,10 +356,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   screenName: {
     fontSize: 18,
     fontWeight: '600',
     color: LCD_COLORS.text,
+  },
+  syncIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: LCD_COLORS.textSecondary,
+    opacity: 0.4,
+  },
+  syncIndicatorConnected: {
+    backgroundColor: '#22c55e',
+    opacity: 1,
   },
   screenIndicator: {
     fontSize: 14,
