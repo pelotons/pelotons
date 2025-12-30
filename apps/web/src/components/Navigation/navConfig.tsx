@@ -112,6 +112,16 @@ function DocsIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function BikeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+      <circle cx="5.5" cy="17.5" r="3.5" strokeWidth={1.5} />
+      <circle cx="18.5" cy="17.5" r="3.5" strokeWidth={1.5} />
+      <path strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" d="M5.5 17.5L9 10l3 7.5M18.5 17.5L15 10l-3 3M9 10l3-3h4l2 3" />
+    </svg>
+  );
+}
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: 'main',
@@ -121,6 +131,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: 'routes', label: 'Routes', path: '/routes', icon: RoutesIcon },
       { id: 'collections', label: 'Collections', path: '/collections', icon: CollectionsIcon },
       { id: 'layouts', label: 'Layouts', path: '/layouts', icon: LayoutsIcon },
+      { id: 'bikes', label: 'My Bikes', path: '/bikes', icon: BikeIcon },
     ],
   },
   {

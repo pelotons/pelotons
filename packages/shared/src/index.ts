@@ -6,6 +6,7 @@ export * from './types/sensor';
 export * from './types/collection';
 export * from './types/profile';
 export * from './types/athlete';
+export * from './types/bike';
 
 // Constants
 export * from './constants/bluetooth';

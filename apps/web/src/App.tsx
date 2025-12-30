@@ -17,6 +17,7 @@ import {
   WidgetReference,
 } from './components/Docs';
 import { ProfilePage } from './components/Profile';
+import { BikeList, BikeEditor, BikeDetail } from './components/ServiceCourse';
 
 function HomePage() {
   return (
@@ -202,6 +203,47 @@ export default function App() {
           <ProtectedRoute>
             <AppShell>
               <ProfilePage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      {/* Service Course - Bikes */}
+      <Route
+        path="/bikes"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <BikeList />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bikes/new"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <BikeEditor />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bikes/:id"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <BikeDetail />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bikes/:id/edit"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <BikeEditor />
             </AppShell>
           </ProtectedRoute>
         }
