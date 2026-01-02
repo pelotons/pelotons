@@ -34,6 +34,10 @@ function dbToScreen(db: DbProfileScreen): ProfileScreen {
     gridColumns: db.grid_columns,
     gridRows: db.grid_rows,
     widgets: db.widgets as Widget[],
+    // Priority layout mode fields
+    layoutMode: db.layout_mode ?? 'grid',
+    layoutPresetId: db.layout_preset_id ?? undefined,
+    slotAssignments: db.slot_assignments ?? [],
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   };
@@ -259,6 +263,10 @@ export function useProfiles() {
     if (updates.gridColumns !== undefined) updateData.grid_columns = updates.gridColumns;
     if (updates.gridRows !== undefined) updateData.grid_rows = updates.gridRows;
     if (updates.widgets !== undefined) updateData.widgets = updates.widgets;
+    // Priority layout mode fields
+    if (updates.layoutMode !== undefined) updateData.layout_mode = updates.layoutMode;
+    if (updates.layoutPresetId !== undefined) updateData.layout_preset_id = updates.layoutPresetId;
+    if (updates.slotAssignments !== undefined) updateData.slot_assignments = updates.slotAssignments;
 
     const { data, error: updateError } = await supabase
       .from('profile_screens')

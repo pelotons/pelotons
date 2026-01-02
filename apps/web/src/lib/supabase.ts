@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Widget } from '@peloton/shared';
+import type { Widget, LayoutMode, SlotAssignment } from '@peloton/shared';
 
 // =============================================================================
 // ENVIRONMENT VALIDATION
@@ -154,6 +154,10 @@ export interface DbProfileScreen {
   grid_columns: number;
   grid_rows: number;
   widgets: Widget[];
+  // Priority layout mode fields
+  layout_mode: LayoutMode | null;
+  layout_preset_id: string | null;
+  slot_assignments: SlotAssignment[] | null;
   created_at: string;
   updated_at: string;
 }
