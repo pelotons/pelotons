@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LoginForm } from './LoginForm';
 import { SignupForm } from './SignupForm';
 
 export function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get('invite');
+
+  // Only show signup form if user has an invite code in the URL
+  const showSignup = !!inviteCode;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center">
@@ -24,10 +28,10 @@ export function AuthPage() {
       </div>
 
       <div className="bg-white shadow-md rounded-lg mx-auto" style={{ minWidth: '400px' }}>
-        {isLogin ? (
-          <LoginForm onSwitchToSignup={() => setIsLogin(false)} />
+        {showSignup ? (
+          <SignupForm onSwitchToLogin={() => window.location.href = '/auth'} />
         ) : (
-          <SignupForm onSwitchToLogin={() => setIsLogin(true)} />
+          <LoginForm />
         )}
       </div>
 

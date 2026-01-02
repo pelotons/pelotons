@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from './AuthProvider';
 
-interface LoginFormProps {
-  onSwitchToSignup: () => void;
-}
-
-export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
+export function LoginForm() {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -77,14 +73,8 @@ export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
-        Don't have an account?{' '}
-        <button
-          onClick={onSwitchToSignup}
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Sign up
-        </button>
+      <p className="mt-6 text-center text-sm text-gray-500">
+        Pelotons is invite-only. Contact an existing member to request access.
       </p>
     </div>
   );
